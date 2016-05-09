@@ -45,6 +45,7 @@ public class Player extends GameObject {
     }
     public void reset() {
         score = 0;
+        coinCount = 0;
         x = GamePanel.WIDTH/2 - width/2;
         dx = 0;
     };

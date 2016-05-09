@@ -9,10 +9,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.example.jameskempf.game.MainActivity"
-    android:id="@+id/relativeLayout">
+    android:id="@+id/relativeLayout"
+    android:background="@drawable/background">
 
     <TextView
-        android:text="Title"
+        android:text="Jungle Jim"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -22,30 +23,68 @@
         android:layout_alignParentEnd="true"
         android:textAlignment="center"
         android:textSize="50dp"
-        android:textColor="#000000" />
+        android:typeface="Ariel"
+        android:textColor="#000000"
+        android:id="@+id/titleText"
+        android:paddingTop="50dp" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start"
         android:id="@+id/start"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
         android:textSize="40dp"
         android:clickable="true"
-        android:backgroundTint="#ffffff" />
+        android:backgroundTint="#ffffff"
+        android:layout_below="@+id/coinText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/titleText"
+        android:layout_alignEnd="@+id/titleText" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Shop"
         android:id="@+id/shop"
-        android:layout_below="@+id/start"
         android:textSize="40dp"
-        android:layout_alignRight="@+id/start"
-        android:layout_alignEnd="@+id/start"
+        android:clickable="true"
+        android:backgroundTint="#ffffff"
+        android:layout_below="@+id/start"
         android:layout_alignLeft="@+id/start"
         android:layout_alignStart="@+id/start"
+        android:layout_alignRight="@+id/start"
+        android:layout_alignEnd="@+id/start" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Highscore: 0"
+        android:id="@+id/highscoreText"
+        android:layout_below="@+id/titleText"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="30dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Coins: 0"
+        android:id="@+id/coinText"
+        android:layout_below="@+id/highscoreText"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="30dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="clear"
+        android:id="@+id/clear"
         android:clickable="true"
-        android:backgroundTint="#ffffff" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

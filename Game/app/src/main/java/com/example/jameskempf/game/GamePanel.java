@@ -4,28 +4,39 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
 
 /**
  * Created by jameskempf on 4/18/16.
+ * based on https://www.youtube.com/playlist?list=PLWweaDaGRHjvQlpLV0yZDmRKVBdy6rSlg
  */
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
-    public static final int WIDTH = 480;
+    public static final int WIDTH = 500;
     public static final int HEIGHT = 850;
     public static final int PLAYER_SPEED = 8;
     public static int TOUCH_X;
 
-    private static final int PLAYER_SIZE = 40;
+    private static final int PLAYER_SIZE = 30;
 
     private static final int ROCK_SIZE = 40;
-    private static final int ROCK_CHANCE = 15;
-    private static final int ROCK_MIN_SPEED = 4;
+    private static final int ROCK_CHANCE = 10;
+    private static final int ROCK_MIN_SPEED = 6;
     private static final int ROCK_MAX_SPEED = 12;
 
     private static final int COIN_SIZE = 40;
@@ -37,6 +48,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private Player player;
     private ArrayList<Rock> rocks = new ArrayList();
     private ArrayList<Coin> coins = new ArrayList();
+    private int currentHighscore;
+    private int currentCoins;
+    private JSONObject dataJSON;
 
     public GamePanel(Context context) {
 
@@ -69,11 +83,16 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
-        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.whitebg));
+        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background));
         player = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.player),
                 PLAYER_SIZE, PLAYER_SIZE);
-
+        try {
+            dataJSON = new JSONObject(readFromFile("data.json"));
+            currentHighscore = dataJSON.getInt("highscore");
+            currentCoins = dataJSON.getInt("coins");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         thread.setRunning(true);
         thread.start();
     }
@@ -109,7 +128,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             // Spawn rocks
             Random r = new Random();
             if (r.nextInt((100 - 0) + 1) + 0 < ROCK_CHANCE) {
-                rocks.add(new Rock(BitmapFactory.decodeResource(getResources(), R.drawable.rock),
+                rocks.add(new Rock(BitmapFactory.decodeResource(getResources(), R.drawable.branch),
                         r.nextInt((WIDTH - ROCK_SIZE - 0) + 1) + 0, 0 - ROCK_SIZE,
                         ROCK_SIZE, ROCK_SIZE,
                         r.nextInt((ROCK_MAX_SPEED - ROCK_MIN_SPEED) + 1) + ROCK_MIN_SPEED));
@@ -171,17 +190,20 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                 coins.get(i).draw(canvas);
             }
 
+            Paint paint = new Paint();
+            paint.setTextSize(30);
+
             String scoreString= "Score: ";
             scoreString += player.getScore();
-            Paint scorePaint = new Paint();
-            scorePaint.setTextSize(30);
-            canvas.drawText(scoreString, 10, 40, scorePaint);
+            canvas.drawText(scoreString, 10, 40, paint);
 
             String coinString = "Coins: ";
             coinString += player.getCoinCount();
-            Paint coinPaint = new Paint();
-            coinPaint.setTextSize(30);
-            canvas.drawText(coinString, 10, 80, coinPaint);
+            canvas.drawText(coinString, 10, 80, paint);
+
+            String highscoreString = "Highscore: ";
+            highscoreString += Integer.toString(currentHighscore);
+            canvas.drawText(highscoreString, 10, 120, paint);
 
             if (!player.getPlaying()) {
                 Paint startPaint = new Paint();
@@ -196,6 +218,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
     private void endGame() {
+        try {
+            if (player.getScore() > currentHighscore) {
+                currentHighscore = player.getScore();
+                dataJSON.put("highscore", currentHighscore);
+            }
+            if (player.getCoinCount() > 0) {
+                currentCoins += player.getCoinCount();
+                dataJSON.put("coins", currentCoins);
+            }
+            writeToFile("data.json", dataJSON.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         player.setPlaying(false);
     }
     private void startGame() {
@@ -203,5 +238,36 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         rocks.clear();
         coins.clear();
         player.setPlaying(true);
+    }
+    private void writeToFile(String fileName, String file) {
+        try {
+            FileOutputStream fos = this.getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
+            fos.write(file.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+    private String readFromFile(String fileName) {
+        String ret = "";
+        try {
+            InputStream inputStream = this.getContext().openFileInput(fileName);
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append(receiveString);
+                }
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        } catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+        return ret;
     }
 }
