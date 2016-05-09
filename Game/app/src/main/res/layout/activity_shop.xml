@@ -9,23 +9,160 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ShopActivity"
     android:id="@+id/relativeLayout"
-    android:background="@drawable/background" >
+    android:background="@drawable/shopbackground" >
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Shop"
-        android:id="@+id/title"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textSize="40dp" />
+        android:text="JUNGLE JIM"
+        android:id="@+id/jim"
+        android:textSize="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="280dp"
+        android:clickable="true"
+        android:textColor="#463c2c" />
 
-    <ListView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
-        android:layout_below="@+id/title"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="JUNGLE JENNY"
+        android:id="@+id/jenny"
+        android:textSize="40dp"
+        android:clickable="true"
+        android:layout_below="@+id/jimDescript"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:textColor="#463c2c" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="JUNGLE JERRY"
+        android:id="@+id/jerry"
+        android:textSize="40dp"
+        android:clickable="true"
+        android:layout_below="@+id/jennyDescript"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:textColor="#463c2c" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="KEVIN"
+        android:id="@+id/kevin"
+        android:textSize="40dp"
+        android:clickable="true"
+        android:layout_below="@+id/jerryDescript"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:textColor="#463c2c" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="coins: 0"
+        android:id="@+id/coinText"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="30dp"
+        android:textIsSelectable="false"
+        android:textColor="#1b1711" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="JUNGLE JIM is the classic jungle man. he enjoys a good swing on the vine as much as the next guy, but his real passion is ballroom dancing.
+
+            (but don't tell him we told you that)"
+        android:id="@+id/jimDescript"
+        android:layout_below="@+id/jim"
+        android:layout_alignLeft="@+id/jenny"
+        android:layout_alignStart="@+id/jenny"
+        android:layout_marginTop="10dp"
+        android:textColor="#463c2c" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="what a babe. strong enough to lift a hippo, smart enough not to try. no wonder JUNGLE JIM fell for her."
+        android:id="@+id/jennyDescript"
+        android:layout_below="@+id/jenny"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        android:textColor="#463c2c" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="JUNGLE JERRY is JUNGLE JENNY&apos;S protective older brother. those blue eyes and blonde locks make all the girls swoon."
+        android:id="@+id/jerryDescript"
+        android:layout_below="@+id/jerry"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        android:textColor="#463c2c" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="we don&apos;t know how he got here, we don't know where he came from. we don&apos;t like to talk about KEVIN..."
+        android:id="@+id/kevinDescript"
+        android:layout_below="@+id/kevin"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        android:textColor="#463c2c" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:src="@drawable/jim_shop"
+        android:layout_alignBottom="@+id/jim"
+        android:layout_toRightOf="@+id/jim"
+        android:layout_marginLeft="20dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView2"
+        android:src="@drawable/jenny_shop"
+        android:layout_alignBottom="@+id/jenny"
+        android:layout_toRightOf="@+id/jenny"
+        android:layout_marginLeft="20dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView3"
+        android:src="@drawable/jerry_shop"
+        android:layout_alignBottom="@+id/jerry"
+        android:layout_toRightOf="@+id/jerry"
+        android:layout_marginLeft="20dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView4"
+        android:src="@drawable/kevin_shop"
+        android:layout_alignBottom="@+id/kevin"
+        android:layout_toRightOf="@+id/kevin"
+        android:layout_marginLeft="20dp" />
+
 </RelativeLayout>

@@ -4,6 +4,7 @@ import android.graphics.Rect;
 
 /**
  * Created by jameskempf on 4/19/16.
+ * based on https://www.youtube.com/playlist?list=PLWweaDaGRHjvQlpLV0yZDmRKVBdy6rSlg
  */
 public abstract class GameObject {
     protected int x, y;

@@ -1,9 +1,12 @@
 package com.example.jameskempf.game;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -32,10 +35,13 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public static final int PLAYER_SPEED = 8;
     public static int TOUCH_X;
 
-    private static final int PLAYER_SIZE = 30;
+    private static final int PLAYER_SIZE = 33;
 
     private static final int ROCK_SIZE = 40;
-    private static final int ROCK_CHANCE = 10;
+    private int ROCK_CHANCE = 10;
+    private static final int ROCK_CHANCE_EASY = 6;
+    private static final int ROCK_CHANCE_MEDIUM = 10;
+    private static final int ROCK_CHANCE_HARD = 14;
     private static final int ROCK_MIN_SPEED = 6;
     private static final int ROCK_MAX_SPEED = 12;
 
@@ -48,8 +54,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private Player player;
     private ArrayList<Rock> rocks = new ArrayList();
     private ArrayList<Coin> coins = new ArrayList();
+    private ArrayList<Bitmap> rockImages = new ArrayList();
+    int rockIndex = 0;
     private int currentHighscore;
     private int currentCoins;
+    private Boolean firstPlay = true;
     private JSONObject dataJSON;
 
     public GamePanel(Context context) {
@@ -70,6 +79,14 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        // Save data
+        try {
+            dataJSON.put("firstPlay", true);
+            writeToFile("data.json", dataJSON.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        // Stop thread
         boolean retry = true;
         while(retry) {
             try {
@@ -83,21 +100,57 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background));
-        player = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.player),
-                PLAYER_SIZE, PLAYER_SIZE);
+        // Retrieve saved data
         try {
             dataJSON = new JSONObject(readFromFile("data.json"));
             currentHighscore = dataJSON.getInt("highscore");
             currentCoins = dataJSON.getInt("coins");
+            // Set character
+            Bitmap playerImage = BitmapFactory.decodeResource(getResources(), R.drawable.jim);
+            switch (dataJSON.getString("selected")) {
+                case "jenny":
+                    playerImage = BitmapFactory.decodeResource(getResources(), R.drawable.jenny);
+                    break;
+                case "jerry":
+                    playerImage = BitmapFactory.decodeResource(getResources(), R.drawable.jerry);
+                    break;
+                case "kevin":
+                    playerImage = BitmapFactory.decodeResource(getResources(), R.drawable.kevin);
+                    break;
+            }
+            // Set difficulty
+            player = new Player(playerImage, PLAYER_SIZE, PLAYER_SIZE);
+            switch(dataJSON.getString("level")) {
+                case "easy":
+                    ROCK_CHANCE = ROCK_CHANCE_EASY;
+                    System.out.println("EASY");
+                    break;
+                case "medium":
+                    ROCK_CHANCE = ROCK_CHANCE_MEDIUM;
+                    System.out.println("MEDIUM");
+                    break;
+                case "hard":
+                    ROCK_CHANCE = ROCK_CHANCE_HARD;
+                    System.out.println("HARD");
+                    break;
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        // Set rocks images
+        rockImages.add(BitmapFactory.decodeResource(getResources(), R.drawable.branch_1));
+        rockImages.add(BitmapFactory.decodeResource(getResources(), R.drawable.branch_2));
+        rockImages.add(BitmapFactory.decodeResource(getResources(), R.drawable.branch_3));
+        rockImages.add(BitmapFactory.decodeResource(getResources(), R.drawable.branch_4));
+        rockImages.add(BitmapFactory.decodeResource(getResources(), R.drawable.rock));
+        bg = new Background(BitmapFactory.decodeResource(getResources(), R.drawable.background));
+        // Start main thread
         thread.setRunning(true);
         thread.start();
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        // Move player
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (!player.getPlaying()) {
                 startGame();
@@ -105,15 +158,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             else {
                 final float scaleFactorX = WIDTH/(getWidth() * 1.f);
                 TOUCH_X = (int)(event.getX() * scaleFactorX);
+                // Move left
                 if (TOUCH_X < WIDTH/2) {
                     player.setLeft();
                 }
+                // Move right
                 else if (TOUCH_X > WIDTH/2) {
                     player.setRight();
                 }
             }
             return true;
         }
+        // Stop moving
         if (event.getAction() == MotionEvent.ACTION_UP) {
             player.setStop();
             TOUCH_X = WIDTH/2;
@@ -128,12 +184,16 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             // Spawn rocks
             Random r = new Random();
             if (r.nextInt((100 - 0) + 1) + 0 < ROCK_CHANCE) {
-                rocks.add(new Rock(BitmapFactory.decodeResource(getResources(), R.drawable.branch),
+                Bitmap rockImage = rockImages.get(rockIndex);
+                if (++ rockIndex >= rockImages.size()) {
+                    rockIndex = 0;
+                }
+                rocks.add(new Rock(rockImage,
                         r.nextInt((WIDTH - ROCK_SIZE - 0) + 1) + 0, 0 - ROCK_SIZE,
                         ROCK_SIZE, ROCK_SIZE,
                         r.nextInt((ROCK_MAX_SPEED - ROCK_MIN_SPEED) + 1) + ROCK_MIN_SPEED));
             }
-            // Sawn coins
+            // Spawn coins
             if (r.nextInt((100 - 0) + 1) + 0 < COIN_CHANCE) {
                 coins.add(new Coin(BitmapFactory.decodeResource(getResources(), R.drawable.coin),
                         r.nextInt((WIDTH - COIN_SIZE - 0) + 1) + 0, 0 - COIN_SIZE,
@@ -155,6 +215,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
                     rock.update();
                 }
             }
+            // Update coins
+            // Check for collisions
             for (int i = 0; i < coins.size(); i ++) {
                 Coin coin = coins.get(i);
                 if (player.getRectangle().intersect(coin.getRectangle())) {
@@ -178,11 +240,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         final float scaleFactorX = getWidth()/(WIDTH * 1.f);
         final float scaleFactorY = getHeight()/(HEIGHT * 1.f);
         if (canvas != null) {
+
             final int savedState = canvas.save();
             canvas.scale(scaleFactorX, scaleFactorY);
 
             bg.draw(canvas);
-            player.draw(canvas);
             for (int i = 0; i < rocks.size(); i++) {
                 rocks.get(i).draw(canvas);
             }
@@ -191,32 +253,45 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             }
 
             Paint paint = new Paint();
-            paint.setTextSize(30);
+            paint.setColor(Color.parseColor("#463c2c"));
+            Typeface typeface = Typeface.createFromAsset(this.getContext().getAssets(), "Afritubu.ttf");
+            paint.setTypeface(typeface);
+            paint.setTextSize(28);
 
-            String scoreString= "Score: ";
+            String scoreString= "score: ";
             scoreString += player.getScore();
-            canvas.drawText(scoreString, 10, 40, paint);
+            canvas.drawText(scoreString, 10, 30, paint);
 
-            String coinString = "Coins: ";
+            String coinString = "coins: ";
             coinString += player.getCoinCount();
-            canvas.drawText(coinString, 10, 80, paint);
+            canvas.drawText(coinString, 10, 60, paint);
 
-            String highscoreString = "Highscore: ";
+            String highscoreString = "highscore: ";
             highscoreString += Integer.toString(currentHighscore);
-            canvas.drawText(highscoreString, 10, 120, paint);
+            canvas.drawText(highscoreString, 10, 90, paint);
 
             if (!player.getPlaying()) {
-                Paint startPaint = new Paint();
-                String s = "Touch to Start";
-                startPaint.setTextSize(50);
-                int xPos = (int) ((WIDTH/2) - ((startPaint.descent() + startPaint.ascent())/2)) ;
-                int yPos = (int) ((HEIGHT/2) - ((startPaint.descent() +    startPaint.ascent())/2)) ;
-                canvas.drawText(s, 100, yPos, startPaint);
+                if (firstPlay) {
+                    System.out.println("FIRST TIME");
+                    Bitmap tutorialImage = BitmapFactory.decodeResource(getResources(), R.drawable.arrows);
+                    canvas.drawBitmap(tutorialImage, 0, 0, null);
+                } else {
+                    Paint startPaint = new Paint();
+                    startPaint.setColor(Color.parseColor("#baff6b"));
+                    startPaint.setTypeface(typeface);
+                    String s = "tap to start";
+                    startPaint.setTextSize(65);
+                    int yPos = (int) ((HEIGHT / 2) - ((startPaint.descent() + startPaint.ascent()) / 2));
+                    canvas.drawText(s, 110, yPos, startPaint);
+                }
             }
+            player.draw(canvas);
 
             canvas.restoreToCount(savedState);
         }
     }
+    // Ends the game
+    // Saves data to json object
     private void endGame() {
         try {
             if (player.getScore() > currentHighscore) {
@@ -233,12 +308,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         }
         player.setPlaying(false);
     }
+    // Start new game
+    // Resets everything
     private void startGame() {
         player.reset();
         rocks.clear();
         coins.clear();
         player.setPlaying(true);
+        if (firstPlay) {
+            firstPlay = false;
+        }
     }
+    // writeToFile and readFromFile from - http://stackoverflow.com/questions/4721626/how-to-get-the-current-context
     private void writeToFile(String fileName, String file) {
         try {
             FileOutputStream fos = this.getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
